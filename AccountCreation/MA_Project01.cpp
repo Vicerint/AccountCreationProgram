@@ -6,16 +6,21 @@
 
 using namespace std; // for cin, cout etc
 
+char status = 'n'; // current exception status
 
 /********** VECTOR PROTOTYPES **********/
 string checkPassword(string pass);
 string checkUsername(string username);
 bool isNameTaken(string username, vector<string>& takenNames);
 bool isCapital(string pass);
+void printMenuUsername();
+void printMenuPassword();
+void UsernameException(string username);
+void PasswordException(string pass);
 
-/********* EXCEPTIONS *********/ 
+/********* EXCEPTIONS *********/
 class NameTaken { /*** Empty Error Class ***/ }; // NameTaken exception, thrown if the chosen username is already taken
-class TooShort  { /*** Empty Error Class ***/ }; // TooShort exception, thrown if the chosen username/password is too short
+class TooShort { /*** Empty Error Class ***/ }; // TooShort exception, thrown if the chosen username/password is too short
 class NoUppercase { /*** Empty Error Class ***/ }; // NoUppercase exception, thrown if there is no uppercase letter in password
 class NoSpecialChar { /*** Empty Error Class ***/ }; // NoSpecialChar exception, thrown if there is not special char in password
 
@@ -23,51 +28,45 @@ int main() // main driver function
 {
 	string username; // username variable to hold chosen username
 	string pass; // password variable to hold chosen password
+	printMenuUsername(); // print menu for username
+	cin >> username; // obtain username
+
+	while (1) // infinite loop
+	{
+		while (status == 'L') // loop while the exception sets a status of L
+		{
+			cout << "Please try again: "; // prompt user for a different username
+			cin >> username;
+			status = 'n';
+			UsernameException(username);
+		}
+
+		UsernameException(username);
+		if (status == 'n') // once the status is cleared, break out of infinite loop
+		{
+			break;
+		}
+	}
 
 
-	cout << "********************************************************************" << endl;
-	cout << "Hello and welcome to our website, here you can make an" << endl;
-	cout << "account before you start to browse. Please input username here: " << endl;
-	cout << "(Username must be at least 5 characters and cannot be already taken)" << endl;
-	cout << "********************************************************************" << endl;
-	cin >> username;
-
-	try
-	{
-		checkUsername(username); // check username
-	}
-	catch (const TooShort&) // catch TooShort exception
-	{
-		cout << "That username is not long enough!"; // inform user their username is not long enough
-		return 0;
-	}
-	catch (const NameTaken&) // catch NameTaken exception
-	{
-		cout << "Sorry, that name is taken"; // inform user that their username choice has already been taken
-		return 0;
-	}
-	cout << "********************************************************************" << endl;
-	cout << "Good! Now please input a password. It must be at least 6 characters" << endl;
-	cout << "and must contain one uppercase letter and special character." << endl;
-	cout << "These special characters include: !, @, #, $, %, ^, &, *, (, )" << endl;
-	cout << "********************************************************************" << endl;
+	printMenuPassword();
 	cin >> pass;
 
-	try
+	while (1)
 	{
-		checkPassword(pass); // check password
-	}
-	catch (const TooShort&) // catch TooShort exception
-	{
-		cout << "That password is too short!"; // inform user their password is too short
-	}
-	catch (const NoSpecialChar&) // catch NoSpecialChar exception
-	{
-		cout << "That password does not contain any special characters!"; // inform user that their password has no special characters
-	}
-	catch (const NoUppercase&) // catch NoUppercase exception
-	{
-		cout << "That password does not contain any uppercase letters!"; // inform user their password has no uppercase letters
+		while (status == 'L') // loop while the exception sets a status of L
+		{
+			cout << "Please try again: "; // prompt user for a different password
+			cin >> pass;
+			status = 'n';
+			PasswordException(pass);
+		}
+
+		PasswordException(pass);
+		if (status == 'n') // once the status is cleared, break out of infinite loop
+		{
+			break;
+		}
 	}
 
 	return 0;
@@ -76,7 +75,7 @@ int main() // main driver function
 
 string checkPassword(string pass)
 {
-	vector<char> Special = { '!', '@', '#', '$', '%', '^', '&', '*', '(', ')'}; // vector of allowed special characters
+	vector<char> Special = { '!', '@', '#', '$', '%', '^', '&', '*', '(', ')' }; // vector of allowed special characters
 
 	if (pass.length() < 6) // if password is less than 6 chars,
 	{
@@ -132,7 +131,6 @@ bool isNameTaken(string username, vector<string>& takenNames) // boolean functio
 	return (find(takenNames.begin(), takenNames.end(), username) != takenNames.end()); // if the name is already taken, return true, otherwise return false
 }
 
-
 bool isCapital(string pass) // boolean helper function for checking if there is an uppercase letter in the password
 {
 	for (char c : pass)
@@ -143,4 +141,68 @@ bool isCapital(string pass) // boolean helper function for checking if there is 
 		}
 	}
 	return false;
+}
+
+void printMenuUsername()
+{
+	cout << "********************************************************************" << endl;
+	cout << "Hello and welcome to our website, here you can make an" << endl;
+	cout << "account before you start to browse. Please input username here: " << endl;
+	cout << "(Username must be at least 5 characters and cannot be already taken)" << endl;
+	cout << "********************************************************************" << endl;
+}
+
+void printMenuPassword()
+{
+	cout << "\n********************************************************************" << endl;
+	cout << "Good! Now please input a password. It must be at least 6 characters" << endl;
+	cout << "and must contain one uppercase letter and special character." << endl;
+	cout << "These special characters include: !, @, #, $, %, ^, &, *, (, )" << endl;
+	cout << "********************************************************************" << endl;
+}
+
+void UsernameException(string username)
+{
+	try
+	{
+		checkUsername(username); // check username
+	}
+	catch (const TooShort&) // catch TooShort exception
+	{
+		cout << "That username is not long enough!\n"; // inform user their username is not long enough
+		status = 'L';
+		return;
+	}
+	catch (const NameTaken&) // catch NameTaken exception
+	{
+		cout << "Sorry, that name is taken\n"; // inform user that their username choice has already been taken
+		status = 'L';
+		return;
+	}
+}
+
+void PasswordException(string pass)
+{
+	try
+	{
+		checkPassword(pass); // check password
+	}
+	catch (const TooShort&) // catch TooShort exception
+	{
+		cout << "That password is too short!\n"; // inform user their password is too short
+		status = 'L';
+		return;
+	}
+	catch (const NoSpecialChar&) // catch NoSpecialChar exception
+	{
+		cout << "That password does not contain any special characters!\n"; // inform user that their password has no special characters
+		status = 'L';
+		return;
+	}
+	catch (const NoUppercase&) // catch NoUppercase exception
+	{
+		cout << "That password does not contain any uppercase letters!\n"; // inform user their password has no uppercase letters
+		status = 'L';
+		return;
+	}
 }
